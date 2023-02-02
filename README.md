@@ -3,7 +3,7 @@ lidarslam_ros2
 ![foxy](https://github.com/rsasaki0109/lidarslam_ros2/workflows/foxy/badge.svg)  
 ![humble](https://github.com/rsasaki0109/lidarslam_ros2/workflows/humble/badge.svg)  
 ====
-## Instalation instructions (for the PG)
+## Installation instructions (for the PG)
 Get into a directory and first install a newer version of the point cloud library.
 ```
 git clone https://github.com/PointCloudLibrary/pcl.git
