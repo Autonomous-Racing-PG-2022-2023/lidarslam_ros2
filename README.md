@@ -2,6 +2,35 @@ lidarslam_ros2
 ====
 ![foxy](https://github.com/rsasaki0109/lidarslam_ros2/workflows/foxy/badge.svg)  
 ![humble](https://github.com/rsasaki0109/lidarslam_ros2/workflows/humble/badge.svg)  
+====
+## Instalation instructions (for the PG)
+Get into a directory and first install a newer version of the point cloud library.
+```
+git clone https://github.com/PointCloudLibrary/pcl.git
+cd pcl && mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j2
+sudo make -j2 install
+(cd .. && cd ..)
+```
+Next you will need g2o.
+```
+git clone https://github.com/RainerKuemmerle/g2o.git
+cd g2o && mkdir build && cd build
+cmake -DCMAKE_BUILD_TYPE=Release ..
+make -j2
+sudo make -j2 install
+(cd .. && cd ..)
+```
+Now you can install the lidar slam.
+```
+mkdir lidarslam && cd lidarslam && mkdir src && cd src
+git clone --recursive https://github.com/Autonomous-Racing-PG-2022-2023/lidarslam_ros2.git
+cd ..
+colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
+```
+____________
+
 ros2 slam package of the frontend using OpenMP-boosted gicp/ndt scan matching and the backend using graph-based slam. 
 
 mobile robot mapping  
