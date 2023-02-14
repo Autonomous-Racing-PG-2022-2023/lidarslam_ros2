@@ -29,6 +29,8 @@ git clone --recursive https://github.com/Autonomous-Racing-PG-2022-2023/lidarsla
 cd ..
 colcon build --cmake-args -DCMAKE_BUILD_TYPE=Release
 ```
+
+NOTE: It might be required to add /usr/local/lib to your library include path to be able to launch lidarslam.
 ____________
 
 ros2 slam package of the frontend using OpenMP-boosted gicp/ndt scan matching and the backend using graph-based slam. 
