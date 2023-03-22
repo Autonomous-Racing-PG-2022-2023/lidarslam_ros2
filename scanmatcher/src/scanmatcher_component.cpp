@@ -177,9 +177,13 @@ void ScanMatcherComponent::initializePubSub()
           tf2::TimePoint time_point = tf2::TimePoint(
             std::chrono::seconds(msg->header.stamp.sec) +
             std::chrono::nanoseconds(msg->header.stamp.nanosec));
-          const geometry_msgs::msg::TransformStamped transform = tfbuffer_.lookupTransform(
-            robot_frame_id_, msg->header.frame_id, time_point);
-          tf2::doTransform(*msg, transformed_msg, transform); // TODO:slow now(https://github.com/ros/geometry2/pull/432)
+			if(tfbuffer_.canTransform((use_odom_ ? odom_frame_id_ : robot_frame_id_), msg->header.frame_id, time_point)){
+			  const geometry_msgs::msg::TransformStamped transform = tfbuffer_.lookupTransform(
+				(use_odom_ ? odom_frame_id_ : robot_frame_id_), msg->header.frame_id, time_point);
+			  tf2::doTransform(*msg, transformed_msg, transform); // TODO:slow now(https://github.com/ros/geometry2/pull/432)
+			}else{
+				return;
+			}
         } catch (tf2::TransformException & e) {
           RCLCPP_ERROR(this->get_logger(), "%s", e.what());
           return;
@@ -316,12 +320,15 @@ void ScanMatcherComponent::receiveCloud(
 
   Eigen::Matrix4f sim_trans = getTransformation(corrent_pose_stamped_.pose);
 
+
   if (use_odom_) {
     geometry_msgs::msg::TransformStamped odom_trans;
     try {
-      odom_trans = tfbuffer_.lookupTransform(
-        odom_frame_id_, robot_frame_id_, tf2_ros::fromMsg(
-          stamp));
+		if(tfbuffer_.canTransform(odom_frame_id_, robot_frame_id_, tf2_ros::fromMsg(stamp))){
+		 odom_trans = tfbuffer_.lookupTransform(
+			odom_frame_id_, robot_frame_id_, tf2_ros::fromMsg(
+			  stamp));
+		}
     } catch (tf2::TransformException & e) {
       RCLCPP_ERROR(this->get_logger(), "%s", e.what());
     }
@@ -332,6 +339,7 @@ void ScanMatcherComponent::receiveCloud(
     }
     previous_odom_mat_ = odom_mat;
   }
+
 
   pcl::PointCloud<pcl::PointXYZI>::Ptr output_cloud(new pcl::PointCloud<pcl::PointXYZI>);
   rclcpp::Clock system_clock;
@@ -386,7 +394,11 @@ void ScanMatcherComponent::publishMapAndPose(
   geometry_msgs::msg::TransformStamped transform_stamped;
   transform_stamped.header.stamp = stamp;
   transform_stamped.header.frame_id = global_frame_id_;
-  transform_stamped.child_frame_id = robot_frame_id_;
+  if (use_odom_) {
+	transform_stamped.child_frame_id = odom_frame_id_;
+  }else{
+	transform_stamped.child_frame_id = robot_frame_id_;
+  }
   transform_stamped.transform.translation.x = position.x();
   transform_stamped.transform.translation.y = position.y();
   transform_stamped.transform.translation.z = position.z();
